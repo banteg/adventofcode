@@ -21,11 +21,32 @@ For example:
 ()) and ))( both result in floor -1 (the first basement level).
 ))) and )())()) both result in floor -3.
 To what floor do the instructions take Santa?
+
+--- Part Two ---
+
+Now, given the same instructions, find the position of the first character that causes him to enter the basement (floor -1). The first character in the instructions has position 1, the second character has position 2, and so on.
+
+For example:
+
+) causes him to enter the basement at character position 1.
+()()) causes him to enter the basement at character position 5.
+What is the position of the character that causes Santa to first enter the basement?
 '''
+
+
 def elevator(instructions):
     commands = {'(': 1, ')': -1}
     result = sum([commands[i] for i in instructions])
     return result
+
+
+def basement(instructions):
+    commands = {'(': 1, ')': -1}
+    floor = 0
+    for c, i in enumerate(instructions, 1):
+        floor += commands[i]
+        if floor == -1:
+            return c
 
 
 def tests():
@@ -33,6 +54,8 @@ def tests():
     assert elevator('(((') == elevator('(()(()(') == elevator('))(((((') == 3
     assert elevator('())') == elevator('))(') == -1
     assert elevator(')))') == elevator(')())())') == -3
+    assert basement(')') == 1
+    assert basement('()())') == 5
 
 
 def read_instructions(file):
@@ -40,7 +63,8 @@ def read_instructions(file):
         data = f.read().strip()
     floor = elevator(data)
     print(floor)
-    return floor
+    base = basement(data)
+    print(base)
 
 
 tests()
