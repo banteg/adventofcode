@@ -22,13 +22,9 @@ For example:
 ))) and )())()) both result in floor -3.
 To what floor do the instructions take Santa?
 '''
-import sys
-
-
 def elevator(instructions):
     commands = {'(': 1, ')': -1}
     result = sum([commands[i] for i in instructions])
-    print(result)
     return result
 
 
@@ -39,8 +35,13 @@ def tests():
     assert elevator(')))') == elevator(')())())') == -3
 
 
-if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        elevator(sys.argv[1])
-    else:
-        tests()
+def read_instructions(file):
+    with open(file) as f:
+        data = f.read().strip()
+    floor = elevator(data)
+    print(floor)
+    return floor
+
+
+tests()
+read_instructions('inputs/day_01.txt')
