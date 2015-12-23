@@ -43,39 +43,28 @@ from itertools import chain
 parser = re.compile(r'(turn on|toggle|turn off) (\d+),(\d+) through (\d+),(\d+)')
 
 
-def switch_lights(instructions):
-    lights = [[False] * 1000 for _ in range(1000)]
+def switch_lights(instructions, ancient=False):
+    if ancient:
+        lights = [[0] * 1000 for _ in range(1000)]
+        commands = {
+            'turn on': lambda x: x + 1,
+            'turn off': lambda x: max(x - 1, 0),
+            'toggle': lambda x: x + 2,
+        }
+    else:
+        lights = [[False] * 1000 for _ in range(1000)]
+        commands = {
+            'turn on': lambda x: True,
+            'turn off': lambda x: False,
+            'toggle': lambda x: not x,
+        }
 
     for i in instructions:
         command, *coords = parser.search(i).groups()
         ax, ay, bx, by = tuple(map(int, coords))
         for x in range(ax, bx + 1):
             for y in range(ay, by + 1):
-                if command == 'turn on':
-                    lights[x][y] = True
-                elif command == 'turn off':
-                    lights[x][y] = False
-                elif command == 'toggle':
-                    lights[x][y] = not lights[x][y]
-
-    lit = sum(chain.from_iterable(lights))
-    return lit
-
-
-def switch_lights_ancient(instructions):
-    lights = [[0] * 1000 for _ in range(1000)]
-
-    for i in instructions:
-        command, *coords = parser.search(i).groups()
-        ax, ay, bx, by = tuple(map(int, coords))
-        for x in range(ax, bx + 1):
-            for y in range(ay, by + 1):
-                if command == 'turn on':
-                    lights[x][y] += 1
-                elif command == 'turn off':
-                    lights[x][y] = max(lights[x][y] - 1, 0)
-                elif command == 'toggle':
-                    lights[x][y] += 2
+                lights[x][y] = commands[command](lights[x][y])
 
     lit = sum(chain.from_iterable(lights))
     return lit
@@ -94,7 +83,7 @@ def read_instructions(file):
     lit = switch_lights(instructions)
     print(lit)
 
-    lit_ancient = switch_lights_ancient(instructions)
+    lit_ancient = switch_lights(instructions, ancient=True)
     print(lit_ancient)
 
 
