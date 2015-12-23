@@ -31,6 +31,14 @@ Carol       Alice
 After trying every other seating arrangement in this hypothetical scenario, you find that this one is the most optimal, with a total change in happiness of 330.
 
 What is the total change in happiness for the optimal seating arrangement of the actual guest list?
+
+--- Part Two ---
+
+In all the commotion, you realize that you forgot to seat yourself. At this point, you're pretty apathetic toward the whole thing, and your happiness wouldn't really go up or down regardless of who you sit next to. You assume everyone else would be just as ambivalent about sitting next to you, too.
+
+So, add yourself to the list, and give all happiness relationships that involve you a score of 0.
+
+What is the total change in happiness for the optimal seating arrangement that actually includes yourself?
 '''
 
 import re
@@ -47,13 +55,19 @@ def parse_happiness(s):
     return left, right, value
 
 
-def sit_guests(guests):
+def sit_guests(guests, forgot=False):
     affections = {}
     attendees = set()
 
     for left, right, value in map(parse_happiness, guests):
         affections[(left, right)] = value
         attendees.update((left, right))
+
+    if forgot:
+        for guest in attendees:
+            affections[(guest, 'Me')] = 0
+            affections[('Me', guest)] = 0
+        attendees.add('Me')
 
     best = - math.inf
     for sit in permutations(attendees):
@@ -71,6 +85,7 @@ def read_instructions(file):
     with open(file) as f:
         instructions = f.readlines()
     sit_guests(instructions)
+    sit_guests(instructions, forgot=True)
 
 
 read_instructions('inputs/day_13.txt')
