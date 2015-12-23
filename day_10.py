@@ -13,6 +13,12 @@ For example:
 1211 becomes 111221 (one 1, one 2, and two 1s).
 111221 becomes 312211 (three 1s, two 2s, and one 1).
 Starting with the digits in your puzzle input, apply this process 40 times. What is the length of the result?
+
+--- Part Two ---
+
+Neat, right? You might also enjoy hearing John Conway talking about this sequence (that's Conway of Conway's Game of Life fame).
+
+Now, starting again with the digits in your puzzle input, apply this process 50 times. What is the length of the new result?
 '''
 
 import re
@@ -37,8 +43,15 @@ def test():
 
 
 test()
+
+
 for i in range(40):
     puzzle_input = look_and_say(puzzle_input)
 
+print(len(puzzle_input))
+
+
+for i in range(10):
+    puzzle_input = look_and_say(puzzle_input)
 
 print(len(puzzle_input))
