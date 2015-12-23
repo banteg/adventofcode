@@ -45,10 +45,14 @@ def get_neighbours(shadow, row, col):
     return neighbours
 
 
-def illuminate(state, steps):
+def illuminate(state, steps, stuck=False):
     for i in range(steps):
+        if stuck:
+            state[0][0] = state[0][99] = state[99][0] = state[99][99] = 1
         state = apply_rules(state)
 
+    if stuck:
+        state[0][0] = state[0][99] = state[99][0] = state[99][99] = 1
     return state
 
 
@@ -58,6 +62,11 @@ def read_instructions(file):
 
     state = load_state(lines)
     state = illuminate(state, 100)
+    on = sum(chain.from_iterable(state))
+    print(on)
+
+    state = load_state(lines)
+    state = illuminate(state, 100, stuck=True)
     on = sum(chain.from_iterable(state))
     print(on)
 
