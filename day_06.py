@@ -15,6 +15,25 @@ turn on 0,0 through 999,999 would turn on (or leave on) every light.
 toggle 0,0 through 999,0 would toggle the first line of 1000 lights, turning off the ones that were on, and turning on the ones that were off.
 turn off 499,499 through 500,500 would turn off (or leave off) the middle four lights.
 After following the instructions, how many lights are lit?
+
+--- Part Two ---
+
+You just finish implementing your winning light pattern when you realize you mistranslated Santa's message from Ancient Nordic Elvish.
+
+The light grid you bought actually has individual brightness controls; each light can have a brightness of zero or more. The lights all start at zero.
+
+The phrase turn on actually means that you should increase the brightness of those lights by 1.
+
+The phrase turn off actually means that you should decrease the brightness of those lights by 1, to a minimum of zero.
+
+The phrase toggle actually means that you should increase the brightness of those lights by 2.
+
+What is the total brightness of all lights combined after following Santa's instructions?
+
+For example:
+
+turn on 0,0 through 0,0 would increase the total brightness by 1.
+toggle 0,0 through 999,999 would increase the total brightness by 2000000.
 '''
 
 import re
@@ -43,6 +62,25 @@ def switch_lights(instructions):
     return lit
 
 
+def switch_lights_ancient(instructions):
+    lights = [[0] * 1000 for _ in range(1000)]
+
+    for i in instructions:
+        command, *coords = parser.search(i).groups()
+        ax, ay, bx, by = tuple(map(int, coords))
+        for x in range(ax, bx + 1):
+            for y in range(ay, by + 1):
+                if command == 'turn on':
+                    lights[x][y] += 1
+                elif command == 'turn off':
+                    lights[x][y] = max(lights[x][y] - 1, 0)
+                elif command == 'toggle':
+                    lights[x][y] += 2
+
+    lit = sum(chain.from_iterable(lights))
+    return lit
+
+
 def test():
     assert switch_lights(['turn on 0,0 through 999,999']) == 1000000
     assert switch_lights(['toggle 0,0 through 999,0']) == 1000
@@ -55,6 +93,9 @@ def read_instructions(file):
 
     lit = switch_lights(instructions)
     print(lit)
+
+    lit_ancient = switch_lights_ancient(instructions)
+    print(lit_ancient)
 
 
 test()
