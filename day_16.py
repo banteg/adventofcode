@@ -31,6 +31,14 @@ perfumes: 1
 You make a list of the things you can remember about each Aunt Sue. Things missing from your list aren't zero - you simply don't remember the value.
 
 What is the number of the Sue that got you the gift?
+
+--- Part Two ---
+
+As you're about to send the thank you note, something in the MFCSAM's instructions catches your eye. Apparently, it has an outdated retroencabulator, and so the output from the machine isn't exact values - some of them indicate ranges.
+
+In particular, the cats and trees readings indicates that there are greater than that many (due to the unpredictable nuclear decay of cat dander and tree pollen), while the pomeranians and goldfish readings indicate that there are fewer than that many (due to the modial interaction of magnetoreluctance).
+
+What is the number of the real Aunt Sue?
 '''
 
 
@@ -53,6 +61,9 @@ THE_AUNT = {
     'perfumes': 1,
 }
 
+higher = {'cats', 'trees'}
+lower = {'pomeranians', 'goldfish'}
+
 
 def parse_aunt(s):
     index = int(re_sue.search(s).group(1))
@@ -61,14 +72,24 @@ def parse_aunt(s):
     return index, stats
 
 
-def mfcsam(aunts):
+def mfcsam(aunts, special=False):
     candidates = set(range(1, 501))
 
     for index, stats in aunts:
         for stat, value in stats.items():
-            if THE_AUNT[stat] != value:
-                candidates.discard(index)
-                break
+            if special:
+                if stat in higher:
+                    if value < THE_AUNT[stat]:
+                        candidates.discard(index)
+                elif stat in lower:
+                    if value > THE_AUNT[stat]:
+                        candidates.discard(index)
+                elif value != THE_AUNT[stat]:
+                        candidates.discard(index)
+
+            else:
+                if value != THE_AUNT[stat]:
+                    candidates.discard(index)
 
     print(candidates)
     return candidates
@@ -79,6 +100,7 @@ def read_instructions(file):
         aunts = list(map(parse_aunt, f.readlines()))
 
     mfcsam(aunts)
+    mfcsam(aunts, special=True)
 
 
 read_instructions('inputs/day_16.txt')
