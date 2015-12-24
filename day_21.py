@@ -37,13 +37,12 @@ def equip_player(equipment, hp=100):
 
 
 def visit_shop():
-    for weap in (0, 1):
-        for armr in (0, 1):
-            for ring in (0, 1, 2):
-                for wc in combinations(weapons, weap):
-                    for ac in combinations(armor, armr):
-                        for rc in combinations(rings, ring):
-                            yield equip_player(wc + ac + rc)
+    for armr in (0, 1):
+        for ring in (0, 1, 2):
+            for wc in combinations(weapons, 1):
+                for ac in combinations(armor, armr):
+                    for rc in combinations(rings, ring):
+                        yield equip_player(wc + ac + rc)
 
 
 def fight(player, boss):
@@ -64,14 +63,20 @@ def fight(player, boss):
 
 
 def rpg_simulator_20xx():
-    outcomes = set()
+    won = set()
+    lost = set()
     for player in visit_shop():
-        boss = boss = Boss(hp=109, damage=8, armor=2)
-        if fight(player, boss):
-            outcomes.add(player)
+        boss = Boss(hp=109, damage=8, armor=2)
+        outcome = fight(player, boss)
+        if outcome:
+            won.add(player)
+        else:
+            lost.add(player)
 
-    result = min(outcomes, key=lambda x: x.cost).cost
-    print(result)
+    min_spent_and_won = min(won, key=lambda x: x.cost)
+    max_spent_and_lost = max(lost, key=lambda x: x.cost)
+    print(min_spent_and_won.cost)
+    print(max_spent_and_lost.cost)
 
 
 rpg_simulator_20xx()
