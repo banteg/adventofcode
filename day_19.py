@@ -26,3 +26,26 @@ def read_instructions(file):
 
 
 read_instructions('inputs/day_19.txt')
+
+
+def fabricate():
+    with open('inputs/day_19.txt') as f:
+        data = f.readlines()
+
+    molecule = data[-1].strip()
+    repl = []
+    for x in data[:-2]:
+        a, b = x.split(' => ')
+        repl.append((b.strip(), a))
+
+    steps = 0
+    target = molecule
+    while target != 'e':
+        for a, b in repl:
+            if a not in target:
+                continue
+            target = target.replace(a, b, 1)
+            steps += 1
+    return steps
+
+print(fabricate())
