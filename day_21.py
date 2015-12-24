@@ -1,34 +1,37 @@
 from collections import namedtuple
-from itertools import combinations
+from itertools import product
 
 Item = namedtuple('Item', ['name', 'cost', 'damage', 'armor'])
 Player = namedtuple('Player', ['hp', 'cost', 'damage', 'armor', 'equipment'])
 Boss = namedtuple('Boss', ['hp', 'damage', 'armor'])
 
-weapons = {
+weapons = [
     Item('Dagger', 8, 4, 0),
     Item('Shortsword', 10, 5, 0),
     Item('Warhammer', 25, 6, 0),
     Item('Longsword', 40, 7, 0),
     Item('Greataxe', 74, 8, 0),
-}
+]
 
-armor = {
+armor = [
     Item('Leather', 13, 0, 1),
     Item('Chainmail', 31, 0, 2),
     Item('Splintmail', 53, 0, 3),
     Item('Bandedmail', 75, 0, 4),
     Item('Platemail', 102, 0, 5),
-}
+    Item('Dummy', 0, 0, 0),
+]
 
-rings = {
+rings = [
     Item('Damage +1', 25, 1, 0),
     Item('Damage +2', 50, 2, 0),
     Item('Damage +3', 100, 3, 0),
     Item('Defense +1', 20, 0, 1),
     Item('Defense +2', 40, 0, 2),
     Item('Defense +3', 80, 0, 3),
-}
+    Item('Dummy1', 0, 0, 0),
+    Item('Dummy2', 0, 0, 0),
+]
 
 
 def equip_player(equipment, hp=100):
@@ -37,12 +40,11 @@ def equip_player(equipment, hp=100):
 
 
 def visit_shop():
-    for armr in (0, 1):
-        for ring in (0, 1, 2):
-            for wc in combinations(weapons, 1):
-                for ac in combinations(armor, armr):
-                    for rc in combinations(rings, ring):
-                        yield equip_player(wc + ac + rc)
+    for equipment in product(weapons, armor, rings, rings):
+        # make sure we didn't pick the same ring twice
+        if equipment[2] == equipment[3]:
+            continue
+        yield equip_player(equipment)
 
 
 def fight(player, boss):
