@@ -1,23 +1,21 @@
 from click import progressbar
-from numpy import zeros, arange
+from numpy import zeros, arange, nonzero
 
 limit = 36000000
 
 
-def deliver_presents(limited=False):
-    hood = zeros(limit // 10, dtype=int)
+def deliver_presents():
+    one = zeros(limit // 10, dtype=int)
+    two = zeros(limit // 10, dtype=int)
     with progressbar(arange(1, limit // 10)) as bar:
         for elf in bar:
-            if limited:
-                hood[elf:elf * 50 + 1:elf] += elf * 11
-            else:
-                hood[elf::elf] += elf * 10
+            one[elf::elf] += elf * 10
+            two[elf:elf * 50 + 1:elf] += elf * 11
 
-    cond = ((k, v) for k, v in enumerate(hood) if v >= limit)
-    result = min(cond)
-    print(result)
-    return result
+    result_one = nonzero(one >= limit)[0][0]
+    result_two = nonzero(two >= limit)[0][0]
+    print(result_one)
+    print(result_two)
 
 
 deliver_presents()
-deliver_presents(limited=True)
