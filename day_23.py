@@ -15,8 +15,8 @@ def parse(i):
     return list(map(maybe_int, parts))
 
 
-def turing(cmds):
-    registers = {'a': 0, 'b': 0}
+def turing(cmds, a=0, b=0):
+    registers = {'a': a, 'b': b}
     i = 0
     while 0 <= i < len(cmds):
         c, r, j = parse(cmds[i])
@@ -42,14 +42,18 @@ def turing(cmds):
             else:
                 i += 1
 
-        print(i, c, r, j, registers)
+        # print(i, c, r, j, registers)
+
+    return registers
 
 
 def read_instructions(file):
     with open(file) as f:
         instructions = f.readlines()
 
-    turing(instructions)
+    one = turing(instructions)
+    two = turing(instructions, a=1)
+    print(one['b'], two['b'], sep='\n')
 
 
 read_instructions('inputs/day_23.txt')
