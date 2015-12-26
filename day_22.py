@@ -1,14 +1,8 @@
 from copy import deepcopy
 import math
-from collections import OrderedDict
 
-spells = OrderedDict([
-    ('magic_missile', 53),
-    ('drain', 73),
-    ('shield', 113),
-    ('poison', 173),
-    ('recharge', 229),
-])
+boss_hp = 51
+boss_damage = 9
 
 spells = {
     'magic_missile': 53,
@@ -18,14 +12,6 @@ spells = {
     'recharge': 229,
 }
 
-spells_symbols = {
-    'magic_missile': '!',
-    'drain': '@',
-    'shield': '#',
-    'poison': '$',
-    'recharge': '%',
-}
-
 magic_effects = {
     'shield': {'armor': 7},
     'poison': {'boss_hp': -3},
@@ -33,15 +19,12 @@ magic_effects = {
 }
 
 
-class BossDead(Exception): pass
-class PlayerDead(Exception): pass
+class BossDead(Exception):
+    pass
 
 
-debug = False
-def trace(s, state):
-    if debug:
-        i = ''.join(x[0] for x in state.chain)
-        print(i, s)
+class PlayerDead(Exception):
+    pass
 
 
 class State(object):
@@ -52,8 +35,8 @@ class State(object):
             mana_spent=0,
             player_hp=50,
             armor=0,
-            boss_hp=51,
-            boss_damage=9,
+            boss_hp=boss_hp,
+            boss_damage=boss_damage,
             effects={},
             chain=[],
         )
@@ -86,13 +69,9 @@ def apply_effects(state):
     state.armor = 0
     for effect in effects:
         for stat, change in magic_effects[effect].items():
-            trace('{effect} provides {change} {stat}; its timer is now {timer}.'.format(
-                effect=effect.title(), change=change, stat=stat, timer=state.effects[effect] - 1
-                ), state)
             state[stat] += change
         state.effects[effect] -= 1
         if state.effects[effect] == 0:
-            trace('{effect} wears off.'.format(effect=effect.title()), state)
             del state.effects[effect]
     return state
 
@@ -126,7 +105,7 @@ def available_spells(state):
 
 
 def simulate(state):
-    if state.mana_spent >= best - min(spells.values()):
+    if state.mana_spent >= best - spells[state.chain[-1]]:
         return
     try:
         if state.hard:
@@ -134,45 +113,18 @@ def simulate(state):
 
         state = apply_effects(state)
         state = player_move(state)
-        state.check_outcome()
 
         state = apply_effects(state)
         state = boss_move(state)
-        state.check_outcome()
     except PlayerDead:
         yield False, state
     except BossDead:
-        print(best, '+', ''.join(spells_symbols[x] for x in state.chain), len(wins))
         yield True, state
     else:
         for spell in available_spells(state):
             xstate = deepcopy(state)
             xstate.chain.append(spell)
             yield from simulate(xstate)
-
-
-def replay(chain, hard=False):
-    state = State()
-    state.hard = hard
-    for n, spell in enumerate(chain, 1):
-        trace('\n-- Player turn --', state)
-        trace('- Player has {player_hp} hit points, {armor} armor, {mana} mana'.format_map(state), state)
-        trace('- Boss has {boss_hp} hit points'.format_map(state), state)
-        trace('Player casts {spell}.'.format(spell=spell.title()), state)
-        state.chain.append(spell)
-        if state.hard:
-            state.player_hp -= 1
-
-        state = apply_effects(state)
-        state = player_move(state)
-        state.check_outcome()
-
-        trace('\n-- Boss turn --', state)
-        trace('- Player has {player_hp} hit points, {armor} armor, {mana} mana'.format_map(state), state)
-        trace('- Boss has {boss_hp} hit points'.format_map(state), state)
-        state = apply_effects(state)
-        state = boss_move(state)
-        state.check_outcome()
 
 
 def wizard_simulator_20xx(hard=False):
