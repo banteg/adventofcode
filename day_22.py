@@ -1,5 +1,6 @@
-from copy import deepcopy
+from copy import copy
 import math
+
 
 boss_hp = 51
 boss_damage = 9
@@ -38,7 +39,6 @@ class State(object):
             boss_hp=boss_hp,
             boss_damage=boss_damage,
             effects={},
-            chain=[],
         )
 
     def __setattr__(self, name, value):
@@ -57,6 +57,12 @@ class State(object):
     def __repr__(self):
         return '<State: {}>'.format(str(self.__dict__))
 
+    def __copy__(self):
+        new = State()
+        new.__dict__.update(self.__dict__)
+        new.effects = self.effects.copy()
+        return new
+
     def check_outcome(self):
         if self.boss_hp <= 0:
             raise BossDead(str(self))
@@ -65,7 +71,7 @@ class State(object):
 
 
 def apply_effects(state):
-    effects = deepcopy(state.effects)
+    effects = state.effects.copy()
     state.armor = 0
     for effect in effects:
         for stat, change in magic_effects[effect].items():
@@ -77,7 +83,7 @@ def apply_effects(state):
 
 
 def player_move(state):
-    cast = state.chain[-1]
+    cast = state.spell
     state.mana -= spells[cast]
     state.mana_spent += spells[cast]
 
@@ -105,7 +111,7 @@ def available_spells(state):
 
 
 def simulate(state):
-    if state.mana_spent >= best - spells[state.chain[-1]]:
+    if state.mana_spent >= best[state.hard] - spells[state.spell]:
         return
     try:
         if state.hard:
@@ -119,30 +125,30 @@ def simulate(state):
     except PlayerDead:
         yield False, state
     except BossDead:
+        best[state.hard] = state.mana_spent
         yield True, state
     else:
         for spell in available_spells(state):
-            xstate = deepcopy(state)
-            xstate.chain.append(spell)
-            yield from simulate(xstate)
+            new = copy(state)
+            new.spell = spell
+            yield from simulate(new)
 
 
 def wizard_simulator_20xx(hard=False):
-    '''yield every possible outcome'''
+    'yields every possible outcome'
     for spell in spells:
         state = State()
         state.hard = hard
-        state.chain.append(spell)
+        state.spell = spell
         yield from simulate(state)
 
 
-wins = []
-best = math.inf
+def win_with_least_mana_spent(hard=False):
+    list(wizard_simulator_20xx(hard))
+    print(best[hard])
+    return best[hard]
 
-for win, state in wizard_simulator_20xx(False):
-    if win:
-        wins.append(state.mana_spent)
-    if wins and min(wins) < best:
-        best = min(wins)
 
-print(best)
+best = {True: math.inf, False: math.inf}
+easy = win_with_least_mana_spent()
+hard = win_with_least_mana_spent(hard=True)
