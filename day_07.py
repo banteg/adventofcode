@@ -25,20 +25,20 @@ def parse(wire, offset=0):
     elif i[1] == 'OR':
         a = parse(i[0], offset+1)
         b = parse(i[2], offset+1)
-        register[wire] = a | b & 0xffff
+        register[wire] = a | b
     elif i[1] == 'AND':
         a = parse(i[0], offset+1)
         b = parse(i[2], offset+1)
-        register[wire] = a & b & 0xffff
+        register[wire] = a & b
     elif i[1] == 'LSHIFT':
         a = parse(i[0], offset+1)
         b = parse(i[2], offset+1)
-        register[wire] = a << b & 0xffff
+        register[wire] = a << b
         return register[wire]
     elif i[1] == 'RSHIFT':
         a = parse(i[0], offset+1)
         b = parse(i[2], offset+1)
-        register[wire] = a >> b & 0xffff
+        register[wire] = a >> b
 
     return register[wire]
 
